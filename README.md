@@ -32,8 +32,7 @@ Archway has a REST API for integrating your own systems. It is not part of the b
 
 ## Getting in touch
 
-Questions, problems and suggestions are welcome as [issues](https://github.com/AdaptableApps/archway/issues)
-on this repository.
+Questions, problems and suggestions are welcome at
+[support@adaptableapps.net](mailto:support@adaptableapps.net).
 
-<!-- TODO(Matthew): add a contact email here if you want one published. I have deliberately not invented an
-     address - support@... may not exist or may not be the one you want beta testers writing to. -->
+Beta testers can also post in the beta testers WhatsApp group - whichever is easier.

@@ -56,11 +56,14 @@ We already know about these. Everything *else* is worth telling us about.
   wrong. Please try again."* rather than a technical description. That is on purpose - the details belong in
   our logs, not on your screen - but it means **the time you saw it is the most useful thing you can tell
   us**. See *What to report* at the end.
-- **A cancelled subscription still opens its tenancy.** If you cancel an Archway subscription whose tenancy
-  you already created, that tenancy keeps working. It should send you to an "inactive" page instead.
-- **Several workspaces are all called "Public".** When you restrict a product to a workspace you will see one
-  entry per region, all with the same name, so there is no way to tell them apart. The list is right; the
-  names are not.
+- **Cancelling takes up to an hour to bite.** The subscription itself shows as cancelled straight away, but
+  the tenancy it paid for can keep working for up to **an hour** before it starts showing the "Not Active"
+  page. That is a caching window, not a mistake - so if you cancel something and can still get in, that is
+  expected for now. Worth telling us if it is still letting you in the next day.
+- **Older tenancies have several workspaces all called "Public".** Fixed for tenancies created from 25
+  August - their workspaces are named after their region. If yours were created before that, the
+  Restrict-to-Workspace picker will offer several identically named entries and there is no way to tell them
+  apart. Nothing is wrong with the data, only the names.
 - **Safari: the very bottom of a long page can be hard to reach** - the last 30-40 pixels. Other browsers are
   fine.
 
@@ -259,8 +262,12 @@ Worth a few minutes each, because they are what people do most:
 
 ## What to report, and how
 
-Please raise anything you find as an [issue](https://github.com/AdaptableApps/archway/issues) on this
-repository.
+Whichever is easier for you:
+
+- **Email** [support@adaptableapps.net](mailto:support@adaptableapps.net), or
+- **Post it in the beta testers WhatsApp group.**
+
+Both reach us. There is nothing to sign up for and no form to fill in - a couple of sentences is fine.
 
 **A good report includes:**
 
@@ -274,8 +281,10 @@ repository.
 5. **A screenshot**, if the problem is something you can see.
 6. **Your browser and device** - "Chrome on Windows", "Safari on iPhone".
 
-**Please don't include:** your password, your Stripe secret key, or anything else you would not want
-published - issues on this repository are public.
+**Please don't include your password or your Stripe secret key** - not in an email, and especially not in
+the group, where everyone else can see it. We will never need either of them to look into something. If you
+think a key has been exposed, roll it in your Stripe dashboard; in test mode nothing is at risk, but it is a
+good habit.
 
 Small things are worth reporting too. Wording that confused you, a button that was not where you expected,
 a page that felt slow - that feedback is as useful to us as an error message.
