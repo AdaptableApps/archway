@@ -1,6 +1,6 @@
 ![Archway](https://adaptableapps.net/images/Archway_Logo_v1_Banner_White_On_Black.svg)
 
-# What changed in Archway — 24 to 30 August 2026
+# What changed in Archway — 24 to 31 August 2026
 
 Everything below is live on the beta environment. These are the changes you can **see or feel** while using
 the app; the first of them landed on the Wednesday.
@@ -8,7 +8,7 @@ the app; the first of them landed on the Wednesday.
 > ### 👉 [https://adaptableapps.demo.us.app.archwayportal.com](https://adaptableapps.demo.us.app.archwayportal.com)
 
 **New** — capability that was not there before &nbsp;·&nbsp; **Improved** — existing behaviour made better
-&nbsp;·&nbsp; **Fixed** — something that was wrong.
+&nbsp;·&nbsp; **Fixed** — something that was wrong &nbsp;·&nbsp; **Changed** — deliberately different, and worth knowing.
 
 ---
 
@@ -43,6 +43,20 @@ the app; the first of them landed on the Wednesday.
 - **Improved** — The app-bar menu lists every available action, and is hidden on screens where it does not apply.
 - **Improved** — The app-bar menu is easier to read, with a clearer background and a highlight as you move down it.
 - **Improved** — Fields that offer a list now show a dropdown arrow and read "Search here or select a value", rather than looking like a plain search box.
+- **Fixed** — A store that cannot take payments yet says so in plain words, instead of showing an internal error.
+- **Fixed** — Navigation actions now work from every screen, not only the ones that had been updated one at a time — previously some simply did nothing when pressed.
+- **Improved** — Menus inside a screen now look the same as the app-bar menus, rather than each having their own style.
+
+## Monday 31 August — staying put after a save
+
+- **Fixed** — Saving a record you are editing in a pop-up no longer closes it. Create a Product and you stay on it, ready to add Prices — no more finding it in the list and opening it again.
+- **Fixed** — Signing out asks you to confirm once, not twice.
+- **Fixed** — The permission switches on the role screens were invisible, drawn in a colour that could not be seen against the background.
+- **Fixed** — Adding a user to a role while a tenancy or workspace is being set up no longer fails.
+- **Improved** — Buttons that show only an icon now name themselves when you hover over them.
+- **Improved** — The app bar is inset from the edges of the window, lining up with the content below it.
+- **Improved** — Fields on the role screens fill the width available, so they line up with the ones around them.
+- **Changed** — The Security Center is hidden for now. Its screens still assume they were opened as a full page rather than in a pop-up, and it is back once that is reworked.
 
 ---
 
