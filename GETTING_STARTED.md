@@ -1,17 +1,26 @@
 ![Archway](https://adaptableapps.net/images/Archway_Logo_v1_Banner_White_On_Black.svg)
 
-# Beta testing guide
+# Getting started
 
-Thank you for helping us test Archway. This guide walks you through the whole product the way a real SaaS
-company would use it: create an account, open a storefront, connect Stripe, publish products, and then buy
-from your own store as a customer.
+Welcome to Archway. This guide takes you from nothing to a working storefront that sells **your** product
+subscriptions to **your** customers, with the payments going straight into your own Stripe account.
 
-It should take about **30-45 minutes** to work through everything. You are welcome to stop after any part -
-each one is useful on its own.
-
-> ### 👉 [https://adaptableapps.demo.us.app.archwayportal.com](https://adaptableapps.demo.us.app.archwayportal.com)
+> ### 👉 [https://adaptableapps.live.us.app.archwayportal.com](https://adaptableapps.live.us.app.archwayportal.com)
 >
-> This is the beta environment. It is separate from anything live, and its data may be reset while we work.
+> Start here. This is where you create your account and subscribe to Archway.
+
+**The steps at a glance:**
+
+1. [Create your account](#step-1---create-your-account)
+2. [Subscribe to Archway](#step-2---subscribe-to-archway)
+3. [Create your tenancy](#step-3---create-your-tenancy) - your company's own space, with its own address
+4. [Connect your Stripe account](#step-4---connect-your-stripe-account)
+5. [Publish your products and prices](#step-5---publish-your-products-and-prices)
+6. [Try your store as a customer, then go live](#step-6---try-your-store-as-a-customer-then-go-live)
+7. [Optional extras](#step-7---optional-extras) - sign-in options, a second administrator, connecting your own
+   software
+
+Allow about **30-45 minutes** for steps 1-6. You can stop after any step and pick up where you left off.
 
 ---
 
@@ -21,272 +30,238 @@ each one is useful on its own.
 
 - A modern browser - Chrome, Edge, Safari or Firefox, kept up to date.
 - An email address you can receive mail at.
-- A **Stripe test-mode account** if you want to try the storefront parts (parts 3-6). It is free to create
-  at [stripe.com](https://stripe.com) and you will need your **test** publishable and secret keys.
-
-**Nothing here involves real money.** Archway is running against Stripe in **test mode**, so use Stripe's
-test card numbers and never a real card:
-
-| Purpose | Card number | Expiry | CVC |
-|---|---|---|---|
-| Payment succeeds | `4242 4242 4242 4242` | any future date | any 3 digits |
-| Payment is declined | `4000 0000 0000 0002` | any future date | any 3 digits |
-
-**Please do not put real customer data into the beta.** Use made-up company names, products and prices. Beta
-data may be wiped without notice while we work.
+- A card to pay for your Archway subscription.
+- A **[Stripe](https://stripe.com) account** for your company, **activated for live payments** - that is, with
+  your business details and the bank account your customers' payments should be paid out to. Stripe walks you
+  through this when you activate the account. You can set Archway up with Stripe's **test** keys first and
+  switch to live ones when you are ready (step 6).
 
 ---
 
-## Known issues - please don't report these
+## Step 1 - Create your account
 
-We already know about these. Everything *else* is worth telling us about.
+1. Open the Archway address above. The first thing you are asked for is your **region** - choose the one closest
+   to you.
 
-- **The menu shows pages you cannot open.** Depending on your permissions you may see entries such as
-  *Tenant Center* or *Security Center*. Tapping one gives a message saying you do not have permission. That
-  message is correct - the menu simply should not have offered it.
-- **Dark mode only.** Light mode exists but is not finished, so the beta runs in dark. If you switch to
-  light you will find styling that has not been done yet - that is known, and not worth reporting.
-- **Free-trial length is not displayed.** If a price includes a free trial, the Store and the subscription
-  pages do not say so yet.
-- **Checkout is slow when the cart is large.** Every item has to be confirmed with Stripe one at a time, so a
-  cart with a dozen or more subscriptions can sit on the checkout page for a minute or more, and may look as
-  though it has failed when it has not. Give it time before retrying - and if you do want to test the slow
-  case deliberately, that is genuinely useful to us. A cart of two or three items is quick.
-- **Error messages are deliberately vague.** If something goes wrong you will usually see *"Something went
-  wrong. Please try again."* rather than a technical description. That is on purpose - the details belong in
-  our logs, not on your screen - but it means **the time you saw it is the most useful thing you can tell
-  us**. See *What to report* at the end.
-- **Cancelling takes up to an hour to bite.** The subscription itself shows as cancelled straight away, but
-  the tenancy it paid for can keep working for up to **an hour** before it starts showing the "Not Active"
-  page. That is a caching window, not a mistake - so if you cancel something and can still get in, that is
-  expected for now. Worth telling us if it is still letting you in the next day.
-- **Older tenancies have several workspaces all called "Public".** Fixed for tenancies created from 25
-  August - their workspaces are named after their region. If yours were created before that, the
-  Restrict-to-Workspace picker will offer several identically named entries and there is no way to tell them
-  apart. Nothing is wrong with the data, only the names.
-- **Safari: the very bottom of a long page can be hard to reach** - the last 30-40 pixels. Other browsers are
-  fine.
-
----
-
-## Part 1 - Create your account
-
-1. Open the beta URL. The first thing you are asked for is your **region** - choose the one closest to you.
-
-   ![Screenshot: region selection](images/beta/01-region-select.png)
-   <!-- SCREENSHOT NEEDED: the region selection page, before any account exists. -->
+   <!-- SCREENSHOT NEEDED: images/getting-started/01-region-select.png - the region selection page, before any account exists. -->
 
    > **About the list.** The regions on offer are the ones where our payment provider supports business bank
-   > accounts, because that is what decides where a SaaS company can actually be *paid*. Between them they
-   > cover most of the world's SaaS businesses. It governs where **your company** can be based - not where
-   > your customers can be, and they can be anywhere.
+   > accounts, because that is what decides where a SaaS company can actually be *paid*. It governs where
+   > **your company** can be based - not where your customers can be. They can be anywhere.
    >
-   > If your country is not listed you can still test everything a customer does (Parts 1, 2 and 7), but you
-   > will not be able to open a storefront of your own. We are adding a second payment provider after launch
-   > to bring more of Africa in, and other regions will follow the same way.
+   > If your country is not listed, please [get in touch](#getting-help) - more regions are being added.
 
 2. Choose **Sign Up** and fill in your name, email address, password, time zone and language.
 
-   ![Screenshot: sign-up form](images/beta/02-sign-up.png)
-   <!-- SCREENSHOT NEEDED: the completed sign-up form with example (fake) details. -->
+   <!-- SCREENSHOT NEEDED: images/getting-started/02-sign-up.png - the completed sign-up form with example details. -->
 
 3. Sign in with the email address and password you just used.
 
-**What we're testing:** that sign-up is clear, that nothing is asked for twice, and that you end up signed in
-without having to guess what to do next.
-
 ---
 
-## Part 2 - Subscribe to Archway
+## Step 2 - Subscribe to Archway
 
-This part does two jobs: you see the store from your customer's side, and you subscribe to **Archway**
-itself - which is what lets you open a storefront of your own in Part 3.
+Your Archway subscription is what lets you open a storefront of your own.
 
 1. Open the **Store**. You will see the products on offer with their plans and prices.
 
-   ![Screenshot: the Store](images/beta/03-store.png)
-   <!-- SCREENSHOT NEEDED: the Store page showing a product with its Plans & Pricing. -->
+   <!-- SCREENSHOT NEEDED: images/getting-started/03-store.png - the Store page showing a product with its Plans & Pricing. -->
 
-2. Choose an **Archway** plan and add it to your **Cart**, then check out. You will be handed to Stripe's
-   payment page - use the test card above.
+2. Choose an **Archway** plan, add it to your **Cart** and check out. You are handed to Stripe's secure payment
+   page to pay.
 
-   ![Screenshot: checkout](images/beta/04-checkout.png)
-   <!-- SCREENSHOT NEEDED: the cart immediately before checkout (not the Stripe page itself). -->
+   <!-- SCREENSHOT NEEDED: images/getting-started/04-checkout.png - the cart immediately before checkout. -->
 
-3. After paying you are returned to Archway. Open **My Subscriptions** and check your new subscription is
-   listed and active. Keep this page open - Part 3 starts from it.
+3. After paying you are returned to Archway. Open **My Subscriptions** and check your new subscription is listed
+   and active. Keep this page open - the next step starts from it.
 
-   ![Screenshot: my subscriptions](images/beta/05-my-subscriptions.png)
-   <!-- SCREENSHOT NEEDED: My Subscriptions listing one active subscription. -->
-
-**What we're testing:** that the price you saw is the price you paid, that returning from Stripe works
-cleanly, and that the subscription appears without you having to refresh or hunt for it.
+   <!-- SCREENSHOT NEEDED: images/getting-started/05-my-subscriptions.png - My Subscriptions listing one active subscription. -->
 
 ---
 
-## Part 3 - Create your tenancy
+## Step 3 - Create your tenancy
 
-A **tenancy** is your company inside Archway. It owns your workspaces, your products and your customers -
-and it gets its own address.
+A **tenancy** is your company inside Archway. It owns your workspaces, your products and your customers - and it
+gets its own address, which is where your customers will shop.
 
 1. On your **Archway subscription**, choose **Create Tenancy**.
 
-   The button appears on the **Archway** subscription only. Other products have nothing to provision, so you
-   will not find it on them - if it seems to be missing, check which subscription you are looking at.
+   The button appears on the **Archway** subscription only - if it seems to be missing, check which subscription
+   you are looking at.
 
-   ![Screenshot: the Archway subscription with the Create Tenancy button](images/beta/06-create-tenancy-button.png)
-   <!-- SCREENSHOT NEEDED: My Subscriptions showing the Archway subscription and its Create Tenancy button. -->
+   <!-- SCREENSHOT NEEDED: images/getting-started/06-create-tenancy-button.png - the Archway subscription and its Create Tenancy button. -->
 
 2. Fill in the details it asks for. One of them is your **subdomain**, and it decides your address:
 
    > a subdomain of `yourcompany` gives you
-   > **`https://yourcompany.demo.us.app.archwayportal.com`**
+   > **`https://yourcompany.live.us.app.archwayportal.com`**
 
-   Choose it as you would a real one - short, lowercase, and recognisably yours.
+   Choose it carefully - short, lowercase and recognisably yours. It is the address you will give your
+   customers, and the name your own software uses to talk to Archway.
 
-   ![Screenshot: the create-tenancy dialog](images/beta/07-create-tenancy-dialog.png)
-   <!-- SCREENSHOT NEEDED: the input dialog, filled in, with the subdomain field visible. -->
+   <!-- SCREENSHOT NEEDED: images/getting-started/07-create-tenancy-dialog.png - the input dialog, filled in, with the subdomain field visible. -->
 
-3. Archway creates the tenancy, refreshes the subscription, and gives you a **button to open your new
-   tenancy's page**. Click it - that takes you to your own address, and everything from here happens there.
+3. Archway creates the tenancy, refreshes the subscription, and gives you a **button to open your new tenancy**.
+   Click it - that takes you to your own address, and everything from here happens there.
 
-   ![Screenshot: the open-tenancy button](images/beta/08-open-tenancy.png)
-   <!-- SCREENSHOT NEEDED: the refreshed subscription showing the button that opens the tenancy. -->
+   <!-- SCREENSHOT NEEDED: images/getting-started/08-open-tenancy.png - the refreshed subscription showing the button that opens the tenancy. -->
 
-4. Your new address asks you to **choose a region** first. That is expected - the region is recorded per
-   tenancy, not per person, because your storefront serves your customers from it.
+4. Your new address asks you to **choose a region** first. That is expected - the region is recorded per tenancy,
+   because your storefront serves your customers from it.
 
-   > **If you briefly see a "maintenance" message while your tenancy is being created**, that is expected
-   > too. Archway is preparing your tenancy's own database, and it holds only *your* tenancy still for those
-   > few seconds - other people using the beta at the same time are not affected. It clears itself; there is
-   > nothing to do but wait.
+   > **If you briefly see a "maintenance" message while your tenancy is being created**, that is expected too.
+   > Archway is preparing your tenancy's own database. It clears itself within moments - there is nothing to do
+   > but wait.
 
-5. **Sign in again** at your new address, with the same email address and password you used to create the
-   tenancy. You are its owner. (Your sign-in does not follow you across addresses - each one is its own
-   storefront, which is exactly how your customers will experience yours.)
-
-**What we're testing:** whether it is clear what a tenancy is and what the subdomain will be used for before
-you commit to one, and whether the hand-off to your new address is smooth.
-
-> **Note:** the **Owner User** and **Admin User** fields on your tenancy are deliberately read-only.
-> Changing who administers a tenancy will be done through a dedicated action later in the beta.
+5. **Sign in again** at your new address, with the same email address and password. You are the tenancy's
+   **owner**. Your sign-in does not follow you from one address to another - each tenancy is its own storefront,
+   which is exactly how your customers will experience yours.
 
 ---
 
-## Part 4 - Set up your store: connect Stripe
+## Step 4 - Connect your Stripe account
 
 Archway takes payments through **your** Stripe account, so your customers' money goes straight to you.
 
-Parts 4 and 5 together are how you set up your store. Everything an owner sets up lives in **Tenant
-Center**, reachable from the menu once you are signed in to your own tenancy: your payment provider, your
-products and your prices.
+Everything you set up as an owner lives in **Tenant Center**, reachable from the menu once you are signed in at
+your tenancy's address: your payment provider, your products and your prices.
 
-1. In **Tenant Center**, link a **payment provider** and enter your Stripe **test-mode** keys.
+1. In **Tenant Center**, open your tenancy and add a **Payment Provider**.
 
-   ![Screenshot: payment provider](images/beta/09-payment-provider.png)
-   <!-- SCREENSHOT NEEDED: the Tenant Payment Provider screen. Blur or fake the key values. -->
+2. Choose the **region** it serves. You add the provider **once per region** - if you sell into two regions,
+   that is two entries, each with its own keys. Adding the same provider twice for the same region is refused on
+   purpose.
 
-2. Choose the region or regions you want that provider to serve. You link the provider **once per region**
-   - so if you sell into two regions, that is two entries, each with its own keys. Trying to add the same
-   provider twice for the same region is refused on purpose, and should tell you so plainly.
+3. Enter your Stripe keys. There are two sets - **test** keys for trying things out and **live** keys for real
+   payments - and each set has two values:
 
-**Please use test keys only.** Never paste a live secret key into the beta.
+   | Field in Archway | What to enter | Where to find it in Stripe |
+   |---|---|---|
+   | **Sandbox Payment Provider Account Key** | Your Stripe **account ID** - starts with `acct_` | Dashboard → **Settings** → **Business** → *Account details* |
+   | **Sandbox Payment Provider Private Api Key** | Your **test** secret key - starts with `sk_test_` | Dashboard → **Developers** → **API keys**, with test mode on |
+   | **Live Payment Provider Account Key** | Your Stripe **account ID** - starts with `acct_` | as above |
+   | **Live Payment Provider Private Api Key** | Your **live** secret key - starts with `sk_live_` | Dashboard → **Developers** → **API keys**, with test mode off |
+
+   The keys are hidden on screen once entered, to keep them safe.
+
+4. Leave **Live Mode** switched **off** for now. While it is off, Archway uses your test keys and no real money
+   moves; step 6 is where you switch it on.
+
+   <!-- SCREENSHOT NEEDED: images/getting-started/09-payment-provider.png - the Tenant Payment Provider screen, with the key values blurred. -->
 
 > **This step is what opens your store.** Until a payment provider is linked and active for a region, your
-> storefront will not open for visitors in it - there would be no way to take their money. If you get to
-> Part 6 and your own store will not open for a signed-out visitor, come back here first.
+> storefront will not open for visitors in it - there would be no way to take their money. If your store will
+> not open for a signed-out visitor later on, come back here first.
 
-**What we're testing:** whether it is clear which keys are needed and where to find them in Stripe, and
-whether anything about handing over your keys feels uncomfortable. We want to hear that.
+**Treat the secret keys like passwords.** Never send them by email or paste them anywhere other than these fields.
+If you think one has been exposed, roll it in your Stripe dashboard and enter the new one here.
 
 ---
 
-## Part 5 - Set up your store: publish a product
+## Step 5 - Publish your products and prices
 
 Products and prices live in **Tenant Center** too.
 
 1. Create a **product** - name, description and image.
 
-   ![Screenshot: create product](images/beta/10-create-product.png)
-   <!-- SCREENSHOT NEEDED: the Product form filled in with an example product. -->
+   <!-- SCREENSHOT NEEDED: images/getting-started/10-create-product.png - the Product form filled in with an example product. -->
 
 2. Add a **price** to it: the amount, the currency and how often it recurs.
 
-   ![Screenshot: create price](images/beta/11-create-price.png)
-   <!-- SCREENSHOT NEEDED: the Product Price form filled in. -->
+   <!-- SCREENSHOT NEEDED: images/getting-started/11-create-price.png - the Product Price form filled in. -->
 
-3. **Approve** the price. A price is not offered for sale until it has been approved - this is deliberate, so
-   a half-finished price is never visible to a customer.
+3. **Approve** the price. A price is not offered for sale until it has been approved - so a half-finished price
+   is never visible to a customer.
 
-   ![Screenshot: approving a price](images/beta/12-approve-price.png)
-   <!-- SCREENSHOT NEEDED: the approval step, or the price showing as approved. -->
+   <!-- SCREENSHOT NEEDED: images/getting-started/12-approve-price.png - the approval step, or the price showing as approved. -->
 
-4. Open the **Store** and confirm your product and its price now appear.
-
-**What we're testing:** whether the approval step makes sense to you, and whether anything you entered comes
-back looking different from how you typed it - especially prices, currencies and decimal points.
+4. Open the **Store** at your tenancy's address and check your product and price appear exactly as you intended -
+   especially the amount, the currency and the decimal point.
 
 ---
 
-## Part 6 - Buy from your own store
+## Step 6 - Try your store as a customer, then go live
 
-The most valuable test in this guide: be your own customer.
+Before you send customers to your store, buy from it yourself.
 
 1. Sign out.
-2. Go to **your own address** - `https://yourcompany.demo.us.app.archwayportal.com` - and sign up there with
-   a **different email address**, as a plain customer with no special rights.
-3. Buy one of the products you published, using the test card.
-4. Check that the subscription appears under **My Subscriptions**.
 
-**What we're testing:** that an ordinary customer sees exactly what they should - your products, your prices,
-their own subscriptions - and nothing that belongs to you or to anyone else. **If you ever see data that
-isn't yours, please tell us immediately.**
+2. Go to **your own address** - `https://yourcompany.live.us.app.archwayportal.com` - and sign up there with a
+   **different email address**, as a plain customer.
 
----
+3. Buy one of your products. With **Live Mode** still off, use one of Stripe's test cards - no real money moves:
 
-## Part 7 - Everyday things
+   | Purpose | Card number | Expiry | CVC |
+   |---|---|---|---|
+   | Payment succeeds | `4242 4242 4242 4242` | any future date | any 3 digits |
+   | Payment is declined | `4000 0000 0000 0002` | any future date | any 3 digits |
 
-Worth a few minutes each, because they are what people do most:
+4. Check the subscription appears under that customer's **My Subscriptions**, and the payment appears in your
+   Stripe dashboard's **test** data.
 
-- Sign out and back in again.
-- Edit your own user details and your account.
-- Switch between tenancies or workspaces if you have more than one.
-- **Try searching a long list.** Sections that can hold many rows - subscriptions, products, tenants - have a
-  **search button beside the expander arrow**. Click it to open the box, type a few letters, then either
-  press **Enter** or click the **search icon** in the box; clearing the box brings the full list back.
-  Worth knowing: a section shows the **100 most recent** entries, newest first, so on a very long list the
-  search box is the way to reach the older ones.
-- Resize the browser window, and try it on a phone or tablet if you have one to hand.
+5. **Go live.** Sign back in as the owner, open your Payment Provider in **Tenant Center**, make sure the **live**
+   keys are entered, and switch **Live Mode** on. From now on your store takes real payments, paid out to your
+   Stripe account.
+
+> **Tip:** after switching Live Mode on, a single small real purchase - refunded afterwards from your Stripe
+> dashboard - is a good final check that everything is connected.
+
+Your store is open. Share your address - `https://yourcompany.live.us.app.archwayportal.com` - with your customers.
 
 ---
 
-## What to report, and how
+## Step 7 - Optional extras
 
-Whichever is easier for you:
+### Let customers sign in with Google, GitHub and others
 
-- **Email** [support@adaptableapps.net](mailto:support@adaptableapps.net), or
-- **Post it in the beta testers WhatsApp group.**
+On your tenancy in **Tenant Center**, the **Authentication Providers** section lists the ways people can sign in
+to your store. Add one to let people sign in with that service instead of a password.
 
-Both reach us. There is nothing to sign up for and no form to fill in - a couple of sentences is fine.
+### Add a Tenant Admin
 
-**A good report includes:**
+The tenancy **owner** - you - can hand day-to-day administration to someone else. On your tenancy in **Tenant
+Center**, choose **Change Admin** and enter the email address the person uses for their Archway account - they
+need to have signed up already. They get administrator access to the tenancy; ownership stays with you.
+
+### Connect your own software
+
+If your product is software, it can check for itself whether a customer's subscription is active - when they sign
+in, when it starts, or a few times a day.
+
+Every **customer account** and every **subscription** in Archway has a **secret key**. Your customer can copy them
+with **Copy Key** in the menu at the top right of their customer account and of the subscription, and enter them
+into your software. See the **[API integration guide](API_INTEGRATION.md)** for the details, with examples in
+many programming languages and for no-code tools such as Zapier.
+
+---
+
+## Good to know
+
+- **Finding things in long lists.** Sections that can hold many rows - subscriptions, products, customers - have a
+  **search button beside the expander arrow**. Type a few letters and press **Enter**; clearing the box brings the
+  full list back. A section shows the **100 most recent** entries, newest first, so on a long list search is the
+  way to reach older ones.
+- **Cancelling takes up to an hour to take effect.** A subscription shows as cancelled straight away, but what it
+  paid for can keep working for up to an hour.
+- **Error messages are deliberately brief.** If something goes wrong you will usually see *"Something went wrong.
+  Please try again."* rather than technical detail - that belongs in our logs, not on your screen. If it keeps
+  happening, [get in touch](#getting-help) and tell us the time you saw it.
+- **On a phone or tablet** - Archway works in any modern mobile browser too.
+
+---
+
+## Getting help
+
+Email **[support@adaptableapps.net](mailto:support@adaptableapps.net)**. A couple of sentences is fine.
+
+**To help us help you quickly, include:**
 
 1. **What you did** - the steps, in order.
 2. **What happened**, and **what you expected** instead.
-3. **When** it happened, with your time zone - roughly is fine, to the nearest minute is better. **This is
-   the most important line in your report.** Because error messages on screen are deliberately vague (see
-   *Known issues*), the time is usually how we find what actually went wrong in our logs. "About 14:35, SAST"
-   is enough.
-4. **Which part of this guide** you were on, if you were following it.
-5. **A screenshot**, if the problem is something you can see.
-6. **Your browser and device** - "Chrome on Windows", "Safari on iPhone".
+3. **When** it happened, with your time zone - "about 14:35, SAST" is enough. This is the most important line,
+   because the time is how we find the details in our logs.
+4. **A screenshot**, if the problem is something you can see.
+5. **Your browser and device** - "Chrome on Windows", "Safari on iPhone".
 
-**Please don't include your password or your Stripe secret key** - not in an email, and especially not in
-the group, where everyone else can see it. We will never need either of them to look into something. If you
-think a key has been exposed, roll it in your Stripe dashboard; in test mode nothing is at risk, but it is a
-good habit.
-
-Small things are worth reporting too. Wording that confused you, a button that was not where you expected,
-a page that felt slow - that feedback is as useful to us as an error message.
-
-Thank you for your time. It genuinely makes the product better.
+**Never include your password or your Stripe secret keys.** We will never need either of them to look into
+something.

@@ -15,18 +15,19 @@ Bring your products, set your prices, connect your Stripe account, and your stor
 
 Please see our [website](https://www.adaptableapps.net) for pricing and purchasing.
 
-## Beta testing
+## Getting started
 
-Archway is currently in **private beta**. If you have been invited to take part, everything you need is here:
+Everything you need to subscribe to Archway and open your own storefront is here:
 
-### 👉 [Beta testing guide](BETA_TESTING.md)
+### 👉 [Getting started guide](GETTING_STARTED.md)
 
-It walks through creating an account, opening a storefront, connecting Stripe, publishing products, and
-buying from your own store - and explains what to report and how.
+It walks through creating your account, subscribing to Archway, creating your tenancy, connecting your Stripe
+account, publishing your products and prices, and trying your store as a customer before you go live.
 
 ## API integration
 
-Archway has a REST API for integrating your own systems. It is not part of the beta at this stage.
+Archway has a REST API for integrating your own systems - for example, so your software can check whether a
+customer's subscription is active.
 
 ### [API integration](API_INTEGRATION.md)
 
@@ -34,5 +35,3 @@ Archway has a REST API for integrating your own systems. It is not part of the b
 
 Questions, problems and suggestions are welcome at
 [support@adaptableapps.net](mailto:support@adaptableapps.net).
-
-Beta testers can also post in the beta testers WhatsApp group - whichever is easier.
