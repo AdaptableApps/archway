@@ -45,7 +45,7 @@ active right now.
 
 | Value | What it is | Where to find it |
 |---|---|---|
-| **Tenancy subdomain** | Your tenancy's subdomain - the first part of your Archway address. For `https://yourcompany.prod.us.app.archwayportal.com` it is `yourcompany`. | Your Archway address, or the tenancy's details in Tenant Center. |
+| **Tenancy subdomain** | Your tenancy's subdomain - the first part of your Archway address. For `https://yourcompany.live.us.app.archwayportal.com` it is `yourcompany`. | Your Archway address, or the tenancy's details in Tenant Center. |
 | **Customer account secret key** | The secret key of the customer account that owns the subscription. | Open the customer account and choose **Copy Key** from the menu at the top right. |
 | **Subscription secret key** | The secret key of the subscription itself. | Open the subscription (for example from **My Subscriptions**) and choose **Copy Key** from the menu at the top right. |
 
@@ -61,7 +61,7 @@ them from their own account - and enters them into your software, which then mak
 
 | Environment | Base URL |
 |---|---|
-| Production | `https://prod.us.api.archwayportal.com` |
+| Production | `https://live.us.api.archwayportal.com` |
 
 All calls are made over **HTTPS**. Plain HTTP is not supported.
 
@@ -158,7 +158,7 @@ your own.
 ### curl
 
 ```bash
-curl -sS -X POST "https://prod.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync" \
+curl -sS -X POST "https://live.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync" \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
   -d '{
@@ -181,7 +181,7 @@ $body = @{
 } | ConvertTo-Json
 
 $response = Invoke-WebRequest -Method Post `
-  -Uri "https://prod.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync" `
+  -Uri "https://live.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync" `
   -ContentType "application/json" -Body $body -SkipHttpErrorCheck
 
 $result = $response.Content | ConvertFrom-Json
@@ -198,7 +198,7 @@ using System.Net.Http.Json;
 using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
 
 var response = await http.PostAsJsonAsync(
-  "https://prod.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync",
+  "https://live.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync",
   new
   {
     TntSubdomain = "yourcompany",
@@ -216,7 +216,7 @@ public record SubscriptionCheckResult(bool IsSubscriptionActive, string? Respons
 ### JavaScript (Node.js 18+)
 
 ```javascript
-const response = await fetch("https://prod.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync", {
+const response = await fetch("https://live.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync", {
   method: "POST",
   headers: { "Content-Type": "application/json", "Accept": "application/json" },
   body: JSON.stringify({
@@ -236,7 +236,7 @@ const isActive = response.status === 200 && result?.IsSubscriptionActive === tru
 import requests
 
 response = requests.post(
-    "https://prod.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync",
+    "https://live.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync",
     json={
         "TntSubdomain": "yourcompany",
         "CustomerAccountSecretKey": "<customer account secret key>",
@@ -269,7 +269,7 @@ type SubscriptionStatus = "active" | "not-active" | "invalid-credentials" | "unk
 
 async function checkSubscription(request: SubscriptionCheckRequest): Promise<SubscriptionStatus> {
   try {
-    const response = await fetch("https://prod.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync", {
+    const response = await fetch("https://live.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Accept": "application/json" },
       body: JSON.stringify(request),
@@ -311,7 +311,7 @@ let check () =
 
         let! response =
             http.PostAsJsonAsync(
-                "https://prod.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync",
+                "https://live.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync",
                 {| TntSubdomain = "yourcompany"
                    CustomerAccountSecretKey = "<customer account secret key>"
                    SubscriptionSecretKey = "<subscription secret key>" |})
@@ -360,7 +360,7 @@ public class SubscriptionCheck {
         "CustomerAccountSecretKey", "<customer account secret key>",
         "SubscriptionSecretKey", "<subscription secret key>"));
 
-    HttpRequest request = HttpRequest.newBuilder(URI.create("https://prod.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync"))
+    HttpRequest request = HttpRequest.newBuilder(URI.create("https://live.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync"))
         .timeout(Duration.ofSeconds(30))
         .header("Content-Type", "application/json")
         .header("Accept", "application/json")
@@ -420,7 +420,7 @@ fun main() {
         )
     )
 
-    val request = HttpRequest.newBuilder(URI.create("https://prod.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync"))
+    val request = HttpRequest.newBuilder(URI.create("https://live.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync"))
         .timeout(Duration.ofSeconds(30))
         .header("Content-Type", "application/json")
         .header("Accept", "application/json")
@@ -478,7 +478,7 @@ func main() {
 	client := &http.Client{Timeout: 30 * time.Second}
 
 	response, err := client.Post(
-		"https://prod.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync",
+		"https://live.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync",
 		"application/json",
 		bytes.NewReader(body),
 	)
@@ -535,7 +535,7 @@ async fn main() -> Result<(), reqwest::Error> {
         .build()?;
 
     let response = client
-        .post("https://prod.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync")
+        .post("https://live.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync")
         .json(&SubscriptionCheckRequest {
             tnt_subdomain: "yourcompany",
             customer_account_secret_key: "<customer account secret key>",
@@ -587,7 +587,7 @@ struct SubscriptionCheckResult: Decodable {
 }
 
 func checkSubscription() async throws -> Bool {
-    var request = URLRequest(url: URL(string: "https://prod.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync")!)
+    var request = URLRequest(url: URL(string: "https://live.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync")!)
     request.httpMethod = "POST"
     request.timeoutInterval = 30
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -615,7 +615,7 @@ func checkSubscription() async throws -> Bool {
 ```objectivec
 #import <Foundation/Foundation.h>
 
-NSURL *url = [NSURL URLWithString:@"https://prod.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync"];
+NSURL *url = [NSURL URLWithString:@"https://live.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync"];
 
 NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
 request.HTTPMethod = @"POST";
@@ -698,7 +698,7 @@ int main(void) {
 
   struct buffer response = {NULL, 0};
 
-  curl_easy_setopt(curl, CURLOPT_URL, "https://prod.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://live.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync");
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
   curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body);
   curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30L);
@@ -763,7 +763,7 @@ int main() {
 
   std::string response;
 
-  curl_easy_setopt(curl, CURLOPT_URL, "https://prod.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://live.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync");
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
   curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body.c_str());
   curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30L);
@@ -800,7 +800,7 @@ The check is a plain JSON `POST`, so any tool that can make an HTTP request can 
 ### Zapier
 
 1. Add a **Webhooks by Zapier** action and choose **POST**.
-2. **URL:** `https://prod.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync`
+2. **URL:** `https://live.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync`
 3. **Payload Type:** `json`
 4. **Data:** three rows - `TntSubdomain`, `CustomerAccountSecretKey` and `SubscriptionSecretKey` - mapped from
    earlier steps or typed in.
