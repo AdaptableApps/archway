@@ -9,7 +9,8 @@ Typical uses:
 
 - your application checks, when a customer signs in or starts it up, that their subscription is still paid up;
 - a licence server unlocks features only while a subscription is active;
-- a no-code automation (Zapier, Make, n8n and similar) branches on whether a customer is subscribed.
+- a no-code automation (Zapier, Make, n8n and similar) branches on whether a customer is subscribed;
+- a plan that is sold for a number of devices only lets that many devices use it.
 
 Questions are welcome at [support@adaptableapps.net](mailto:support@adaptableapps.net).
 
@@ -23,6 +24,7 @@ Questions are welcome at [support@adaptableapps.net](mailto:support@adaptableapp
 - [The request](#the-request)
 - [The response](#the-response)
 - [Status codes](#status-codes)
+- [Devices](#devices)
 - [Examples](#examples)
 - [No-code tools - Zapier, Make, n8n](#no-code-tools---zapier-make-n8n)
 - [Keeping the keys safe](#keeping-the-keys-safe)
@@ -36,8 +38,9 @@ Every **customer account** in Archway has a secret key, and so does every **subs
 keys identify one subscription belonging to one customer - and they are the *only* credentials the check needs.
 There is no separate API key, token or sign-in.
 
-You send the two keys, plus your tenancy's subdomain, and Archway answers with whether that subscription is
-active right now.
+You send the two keys, your tenancy's subdomain, which **product** and **plan** your software is, and which
+**device** is asking. Archway answers with whether that subscription is active right now - for that product, that
+plan and, when the plan is sold per device, that device.
 
 ---
 
@@ -48,12 +51,16 @@ active right now.
 | **Tenancy subdomain** | Your tenancy's subdomain - the first part of your Archway address. For `https://yourcompany.live.us.app.archwayportal.com` it is `yourcompany`. | Your Archway address, or the tenancy's details in Tenant Center. |
 | **Customer account secret key** | The secret key of the customer account that owns the subscription. | Open the customer account and choose **Copy Key** from the menu at the top right. |
 | **Subscription secret key** | The secret key of the subscription itself. | Open the subscription (for example from **My Subscriptions**) and choose **Copy Key** from the menu at the top right. |
+| **Product identifier** | The identifier of your product - the same for every customer. | Open the product in Archway and copy its identifier from the menu at the top right. |
+| **Product plan identifier** | The identifier of the plan the subscription is for - the same for every customer on that plan. | Open the product plan in Archway and copy its identifier from the menu at the top right. |
+| **Device identifier** | A value your software creates that stays the same on one device and differs between devices. | Your own code - see [Devices](#devices). |
 
 Both pages also offer **Regenerate Key**, which replaces the key with a new one. The old key stops working
 immediately - see [Good to know](#good-to-know).
 
 In practice your **customer** usually holds the two keys - you hand them over when they subscribe, or they copy
-them from their own account - and enters them into your software, which then makes the check.
+them from their own account - and enters them into your software, which then makes the check. The product and
+plan identifiers belong to **you**: build them into your software.
 
 ---
 
@@ -75,19 +82,27 @@ Content-Type: application/json
 Accept: application/json
 ```
 
-The body is a JSON object with three fields, all **required**:
+The body is a JSON object with these fields:
 
-| Field | Type | Description |
-|---|---|---|
-| `TntSubdomain` | string | Your tenancy subdomain, e.g. `yourcompany`. |
-| `CustomerAccountSecretKey` | string | The customer account's secret key. |
-| `SubscriptionSecretKey` | string | The subscription's secret key. |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `TntSubdomain` | string | yes | Your tenancy subdomain, e.g. `yourcompany`. |
+| `CustomerAccountSecretKey` | string | yes | The customer account's secret key. |
+| `SubscriptionSecretKey` | string | yes | The subscription's secret key. |
+| `ProductIdentifier` | string (GUID) | yes | Your product's identifier. The subscription must be for this product. |
+| `ProductPlanIdentifier` | string (GUID) | yes | The plan's identifier. The subscription must be for this plan. |
+| `DeviceIdentifier` | string | for plans sold per device | Identifies the device making the check - see [Devices](#devices). Send it always; it is ignored when the plan is not sold per device. |
+| `DeviceName` | string | no | A name for the device that you and your customer will recognise, e.g. the computer's name. Shown in Archway's list of the subscription's devices. |
 
 ```json
 {
   "TntSubdomain": "yourcompany",
   "CustomerAccountSecretKey": "ab572cbc-bcf0-46b0-9535-80a6adfb18c1",
-  "SubscriptionSecretKey": "00709b50-e7dc-4f6f-a8d1-82f13b057c91"
+  "SubscriptionSecretKey": "00709b50-e7dc-4f6f-a8d1-82f13b057c91",
+  "ProductIdentifier": "3f6c2a91-8d47-4e0b-b5a2-1c9e7d4f6a08",
+  "ProductPlanIdentifier": "a7d14e52-0b3c-49f8-8e61-5f2b9c0d3e74",
+  "DeviceIdentifier": "9f2c4e1a7b...",
+  "DeviceName": "Jane's MacBook Pro"
 }
 ```
 
@@ -100,17 +115,39 @@ body, which HTTPS encrypts.
 
 ## The response
 
-Every answer is a JSON object with the same two fields:
+Every answer is a JSON object with these fields:
 
 | Field | Type | Description |
 |---|---|---|
-| `IsSubscriptionActive` | boolean | `true` only when the keys matched **and** the subscription is active. Otherwise `false`. |
+| `IsSubscriptionActive` | boolean | `true` only when everything matched, the subscription is active **and** - for a plan sold per device - this device is allowed. Otherwise `false`. |
+| `Status` | string | What happened, for your code to act on: `Active`, `NotActive`, `InvalidRequest`, `InvalidCredentials`, `DeviceLimitReached`, `DeviceDisabled` or `Error`. |
 | `ResponseMessage` | string | A short, human-readable explanation. Meant for logs and people - do not parse it. |
+| `ProductPrice` | object or `null` | The subscription's plan, whenever the keys matched - see below. |
+
+`ProductPrice` has:
+
+| Field | Type | Description |
+|---|---|---|
+| `ProductPriceIdentifier` | string (GUID) | The price the customer subscribed at. |
+| `ProductPlanIdentifier` | string (GUID) | The plan that price belongs to. |
+| `Name` | string | The plan's name, as your customers see it. |
+| `IsDeviceSubscription` | boolean | `true` when the plan is sold per device. |
+| `MaxNoOfDevices` | number or `null` | For a plan sold per device, how many devices may be active at once. `null` or `0` means no limit. |
+| `NoOfDevicesInUse` | number or `null` | For a plan sold per device, how many devices are active - including this one once it is registered. |
 
 ```json
 {
   "IsSubscriptionActive": true,
-  "ResponseMessage": "Subscription is active."
+  "Status": "Active",
+  "ResponseMessage": "Subscription is active.",
+  "ProductPrice": {
+    "ProductPriceIdentifier": "4f0d7c8e-2b51-4b6f-9a07-6f1d3e2c9b10",
+    "ProductPlanIdentifier": "a7d14e52-0b3c-49f8-8e61-5f2b9c0d3e74",
+    "Name": "Professional",
+    "IsDeviceSubscription": true,
+    "MaxNoOfDevices": 3,
+    "NoOfDevicesInUse": 2
+  }
 }
 ```
 
@@ -123,17 +160,21 @@ Every answer is a JSON object with the same two fields:
 This endpoint uses the HTTP status code to tell you what happened, so tools that only look at the status can
 still react correctly.
 
-| Status | Meaning | `IsSubscriptionActive` | `ResponseMessage` | What to do |
+| Status | `Status` field | Meaning | `IsSubscriptionActive` | What to do |
 |---|---|---|---|---|
-| **200 OK** | The keys matched and the subscription was checked. | `true` or `false` | `Subscription is active.` / `Subscription is not active.` | Use `IsSubscriptionActive`. `false` means the subscription exists but is not active - for example cancelled, or a payment has failed. |
-| **400 Bad Request** | The request was incomplete or was not valid JSON. | `false` | `Invalid request. ...` | Fix the request - a field is missing or empty. |
-| **401 Unauthorized** | The keys did not identify a subscription. | `false` | `Invalid credentials.` | Check the subdomain and both keys. A key may have been regenerated. |
-| **500 Internal Server Error** | The check could not be completed on our side. | `false` | `The subscription could not be checked. Please try again later.` | Retry later. **Do not treat this as "not active".** |
-| **403 Forbidden** | Blocked before reaching Archway - usually too many requests from one address. | - | - | The body may not be JSON. Slow down and retry after a few minutes. |
+| **200 OK** | `Active` / `NotActive` | Everything matched and the subscription was checked. | `true` or `false` | Use `IsSubscriptionActive`. `false` means the subscription exists but is not active - for example cancelled, or a payment has failed. |
+| **400 Bad Request** | `InvalidRequest` | The request was incomplete or was not valid JSON - including a missing `DeviceIdentifier` for a plan sold per device. | `false` | Fix the request - `ResponseMessage` says which fields are required. |
+| **401 Unauthorized** | `InvalidCredentials` | The keys, product and plan did not identify a subscription. | `false` | Check the subdomain, both keys and both identifiers. A key may have been regenerated. |
+| **403 Forbidden** | `DeviceLimitReached` | A plan sold per device already has its maximum of active devices, and this device is not one of them. | `false` | Tell the customer to deactivate one of their devices in Archway, or move to a plan with more devices. |
+| **403 Forbidden** | `DeviceDisabled` | This device was registered on the subscription but has been deactivated. | `false` | Tell the customer the device has been deactivated; they can activate it again in Archway if they have room. |
+| **403 Forbidden** | - (no JSON) | Blocked before reaching Archway - usually too many requests from one address. | - | The body is not JSON. Slow down and retry after a few minutes. |
+| **500 Internal Server Error** | `Error` | The check could not be completed on our side. | `false` | Retry later. **Do not treat this as "not active".** |
 
-`401` deliberately does not say *which* value was wrong - an unknown subdomain, a wrong customer account key
-and a wrong subscription key all give the same answer. That is on purpose, so the check cannot be used to find
-out which keys or tenancies exist.
+A `403` from Archway always has a JSON body with a `Status`; a `403` without one is the firewall.
+
+`401` deliberately does not say *which* value was wrong - an unknown subdomain, a wrong key, and keys for a
+different product or plan all give the same answer. That is on purpose, so the check cannot be used to find out
+which keys or tenancies exist.
 
 ### Deciding what to do
 
@@ -141,12 +182,46 @@ out which keys or tenancies exist.
 200 and IsSubscriptionActive = true    ->  active: allow access
 200 and IsSubscriptionActive = false   ->  not active: refuse, and tell the customer their subscription has lapsed
 401                                    ->  wrong keys: ask the customer to re-enter them
+403 with Status DeviceLimitReached     ->  refuse on this device: the customer must deactivate another device first
+403 with Status DeviceDisabled         ->  refuse on this device: it has been deactivated
 400                                    ->  a bug in your request
-500, 403, timeout or no connection     ->  could not tell: retry later; do not lock the customer out on this alone
+500, 403 without JSON, timeout         ->  could not tell: retry later; do not lock the customer out on this alone
+or no connection
 ```
 
 For an application that runs offline or must not lock a paying customer out during an outage, a common
 approach is to remember the last successful answer and only act on a definite `200` or `401`.
+
+---
+
+## Devices
+
+A plan can be sold **per device**: the plan says how many devices may use one subscription at the same time.
+For those plans, Archway keeps a list of the subscription's devices.
+
+- **The first check from a new device registers it** - as long as the subscription has fewer active devices than
+  the plan allows. The check answers `200` / `Active`, and the device appears in the subscription's device list
+  in Archway, under the `DeviceName` you sent.
+- **A registered, active device is simply allowed**, check after check.
+- **Once the limit is reached, a new device is refused** with `403` / `DeviceLimitReached`.
+- **Your customer manages the list in Archway:** they open the subscription, deactivate a device they no longer
+  use to free its place, and can activate one again while there is room. A deactivated device is refused with
+  `403` / `DeviceDisabled`.
+
+For plans that are not sold per device, devices are not counted and `DeviceIdentifier` is ignored - but sending it
+always costs nothing, and your software keeps working if a plan becomes per-device later.
+
+**Making a good `DeviceIdentifier`.** It must stay the same on one device - across restarts, updates and
+re-installs - and differ between devices. The operating system's own machine id is a good starting point:
+
+| OS | Machine id |
+|---|---|
+| Windows | `MachineGuid` under `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Cryptography` |
+| macOS | `IOPlatformUUID`, from `ioreg -rd1 -c IOPlatformExpertDevice` |
+| Linux | `/etc/machine-id` |
+
+Send a **hash** of it rather than the id itself - for example SHA-256 of the machine id and your product
+identifier, as hex - so the value means nothing outside your product.
 
 ---
 
@@ -164,7 +239,11 @@ curl -sS -X POST "https://live.us.api.archwayportal.com/Sdk/CheckSubscriptionAsy
   -d '{
         "TntSubdomain": "yourcompany",
         "CustomerAccountSecretKey": "<customer account secret key>",
-        "SubscriptionSecretKey": "<subscription secret key>"
+        "SubscriptionSecretKey": "<subscription secret key>",
+        "ProductIdentifier": "<product identifier>",
+        "ProductPlanIdentifier": "<product plan identifier>",
+        "DeviceIdentifier": "<device identifier>",
+        "DeviceName": "<device name>"
       }' \
   -w "\nHTTP %{http_code}\n"
 ```
@@ -178,6 +257,10 @@ $body = @{
   TntSubdomain             = "yourcompany"
   CustomerAccountSecretKey = "<customer account secret key>"
   SubscriptionSecretKey    = "<subscription secret key>"
+  ProductIdentifier        = "<product identifier>"
+  ProductPlanIdentifier    = "<product plan identifier>"
+  DeviceIdentifier         = "<device identifier>"
+  DeviceName               = $env:COMPUTERNAME
 } | ConvertTo-Json
 
 $response = Invoke-WebRequest -Method Post `
@@ -185,7 +268,7 @@ $response = Invoke-WebRequest -Method Post `
   -ContentType "application/json" -Body $body -SkipHttpErrorCheck
 
 $result = $response.Content | ConvertFrom-Json
-"HTTP $($response.StatusCode) - active: $($result.IsSubscriptionActive) - $($result.ResponseMessage)"
+"HTTP $($response.StatusCode) - $($result.Status) - active: $($result.IsSubscriptionActive) - $($result.ResponseMessage)"
 ```
 
 ### C# (.NET)
@@ -203,14 +286,18 @@ var response = await http.PostAsJsonAsync(
   {
     TntSubdomain = "yourcompany",
     CustomerAccountSecretKey = "<customer account secret key>",
-    SubscriptionSecretKey = "<subscription secret key>"
+    SubscriptionSecretKey = "<subscription secret key>",
+    ProductIdentifier = "<product identifier>",
+    ProductPlanIdentifier = "<product plan identifier>",
+    DeviceIdentifier = "<device identifier>",
+    DeviceName = Environment.MachineName
   });
 
 var result = await response.Content.ReadFromJsonAsync<SubscriptionCheckResult>();
 
 var isActive = response.StatusCode == System.Net.HttpStatusCode.OK && result?.IsSubscriptionActive == true;
 
-public record SubscriptionCheckResult(bool IsSubscriptionActive, string? ResponseMessage);
+public record SubscriptionCheckResult(bool IsSubscriptionActive, string? Status, string? ResponseMessage);
 ```
 
 ### JavaScript (Node.js 18+)
@@ -222,7 +309,11 @@ const response = await fetch("https://live.us.api.archwayportal.com/Sdk/CheckSub
   body: JSON.stringify({
     TntSubdomain: "yourcompany",
     CustomerAccountSecretKey: "<customer account secret key>",
-    SubscriptionSecretKey: "<subscription secret key>"
+    SubscriptionSecretKey: "<subscription secret key>",
+    ProductIdentifier: "<product identifier>",
+    ProductPlanIdentifier: "<product plan identifier>",
+    DeviceIdentifier: "<device identifier>",
+    DeviceName: "<device name>"
   })
 });
 
@@ -241,6 +332,10 @@ response = requests.post(
         "TntSubdomain": "yourcompany",
         "CustomerAccountSecretKey": "<customer account secret key>",
         "SubscriptionSecretKey": "<subscription secret key>",
+        "ProductIdentifier": "<product identifier>",
+        "ProductPlanIdentifier": "<product plan identifier>",
+        "DeviceIdentifier": "<device identifier>",
+        "DeviceName": "<device name>",
     },
     timeout=30,
 )
@@ -251,21 +346,26 @@ is_active = response.status_code == 200 and bool(result and result.get("IsSubscr
 
 ### TypeScript (Node.js 18+, Deno, Bun)
 
-Returns one of four outcomes, matching [Deciding what to do](#deciding-what-to-do).
+Returns one of five outcomes, matching [Deciding what to do](#deciding-what-to-do).
 
 ```typescript
 interface SubscriptionCheckRequest {
   TntSubdomain: string;
   CustomerAccountSecretKey: string;
   SubscriptionSecretKey: string;
+  ProductIdentifier: string;
+  ProductPlanIdentifier: string;
+  DeviceIdentifier: string;
+  DeviceName?: string;
 }
 
 interface SubscriptionCheckResult {
   IsSubscriptionActive: boolean;
+  Status?: string;
   ResponseMessage?: string;
 }
 
-type SubscriptionStatus = "active" | "not-active" | "invalid-credentials" | "unknown";
+type SubscriptionStatus = "active" | "not-active" | "invalid-credentials" | "device-not-allowed" | "unknown";
 
 async function checkSubscription(request: SubscriptionCheckRequest): Promise<SubscriptionStatus> {
   try {
@@ -277,7 +377,12 @@ async function checkSubscription(request: SubscriptionCheckRequest): Promise<Sub
     });
 
     if (response.status === 401) return "invalid-credentials";
-    if (response.status !== 200) return "unknown"; // 400, 403, 500 ...
+    if (response.status === 403) {
+      // Archway's own 403 has a JSON body with a Status; the firewall's has none
+      const refused = (await response.json().catch(() => null)) as SubscriptionCheckResult | null;
+      return refused?.Status === "DeviceLimitReached" || refused?.Status === "DeviceDisabled" ? "device-not-allowed" : "unknown";
+    }
+    if (response.status !== 200) return "unknown"; // 400, 500 ...
 
     const result = (await response.json()) as SubscriptionCheckResult;
     return result.IsSubscriptionActive === true ? "active" : "not-active";
@@ -290,6 +395,10 @@ checkSubscription({
   TntSubdomain: "yourcompany",
   CustomerAccountSecretKey: "<customer account secret key>",
   SubscriptionSecretKey: "<subscription secret key>",
+  ProductIdentifier: "<product identifier>",
+  ProductPlanIdentifier: "<product plan identifier>",
+  DeviceIdentifier: "<device identifier>",
+  DeviceName: "<device name>",
 }).then((subscriptionStatus) => console.log(subscriptionStatus));
 ```
 
@@ -314,7 +423,11 @@ let check () =
                 "https://live.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync",
                 {| TntSubdomain = "yourcompany"
                    CustomerAccountSecretKey = "<customer account secret key>"
-                   SubscriptionSecretKey = "<subscription secret key>" |})
+                   SubscriptionSecretKey = "<subscription secret key>"
+                   ProductIdentifier = "<product identifier>"
+                   ProductPlanIdentifier = "<product plan identifier>"
+                   DeviceIdentifier = "<device identifier>"
+                   DeviceName = Environment.MachineName |})
 
         let! result =
             task {
@@ -358,7 +471,11 @@ public class SubscriptionCheck {
     String body = mapper.writeValueAsString(Map.of(
         "TntSubdomain", "yourcompany",
         "CustomerAccountSecretKey", "<customer account secret key>",
-        "SubscriptionSecretKey", "<subscription secret key>"));
+        "SubscriptionSecretKey", "<subscription secret key>",
+        "ProductIdentifier", "<product identifier>",
+        "ProductPlanIdentifier", "<product plan identifier>",
+        "DeviceIdentifier", "<device identifier>",
+        "DeviceName", "<device name>"));
 
     HttpRequest request = HttpRequest.newBuilder(URI.create("https://live.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync"))
         .timeout(Duration.ofSeconds(30))
@@ -409,6 +526,10 @@ data class SubscriptionCheckRequest(
     val TntSubdomain: String,
     val CustomerAccountSecretKey: String,
     val SubscriptionSecretKey: String,
+    val ProductIdentifier: String,
+    val ProductPlanIdentifier: String,
+    val DeviceIdentifier: String,
+    val DeviceName: String,
 )
 
 fun main() {
@@ -417,6 +538,10 @@ fun main() {
             TntSubdomain = "yourcompany",
             CustomerAccountSecretKey = "<customer account secret key>",
             SubscriptionSecretKey = "<subscription secret key>",
+            ProductIdentifier = "<product identifier>",
+            ProductPlanIdentifier = "<product plan identifier>",
+            DeviceIdentifier = "<device identifier>",
+            DeviceName = "<device name>",
         )
     )
 
@@ -458,10 +583,15 @@ type subscriptionCheckRequest struct {
 	TntSubdomain             string `json:"TntSubdomain"`
 	CustomerAccountSecretKey string `json:"CustomerAccountSecretKey"`
 	SubscriptionSecretKey    string `json:"SubscriptionSecretKey"`
+	ProductIdentifier        string `json:"ProductIdentifier"`
+	ProductPlanIdentifier    string `json:"ProductPlanIdentifier"`
+	DeviceIdentifier         string `json:"DeviceIdentifier"`
+	DeviceName               string `json:"DeviceName"`
 }
 
 type subscriptionCheckResult struct {
 	IsSubscriptionActive bool   `json:"IsSubscriptionActive"`
+	Status               string `json:"Status"`
 	ResponseMessage      string `json:"ResponseMessage"`
 }
 
@@ -470,6 +600,10 @@ func main() {
 		TntSubdomain:             "yourcompany",
 		CustomerAccountSecretKey: "<customer account secret key>",
 		SubscriptionSecretKey:    "<subscription secret key>",
+		ProductIdentifier:        "<product identifier>",
+		ProductPlanIdentifier:    "<product plan identifier>",
+		DeviceIdentifier:         "<device identifier>",
+		DeviceName:               "<device name>",
 	})
 	if err != nil {
 		panic(err)
@@ -493,7 +627,7 @@ func main() {
 
 	isActive := response.StatusCode == http.StatusOK && result.IsSubscriptionActive
 
-	fmt.Printf("HTTP %d - active: %t - %s\n", response.StatusCode, isActive, result.ResponseMessage)
+	fmt.Printf("HTTP %d - %s - active: %t - %s\n", response.StatusCode, result.Status, isActive, result.ResponseMessage)
 }
 ```
 
@@ -519,6 +653,10 @@ struct SubscriptionCheckRequest<'a> {
     tnt_subdomain: &'a str,
     customer_account_secret_key: &'a str,
     subscription_secret_key: &'a str,
+    product_identifier: &'a str,
+    product_plan_identifier: &'a str,
+    device_identifier: &'a str,
+    device_name: &'a str,
 }
 
 #[derive(Deserialize)]
@@ -540,6 +678,10 @@ async fn main() -> Result<(), reqwest::Error> {
             tnt_subdomain: "yourcompany",
             customer_account_secret_key: "<customer account secret key>",
             subscription_secret_key: "<subscription secret key>",
+            product_identifier: "<product identifier>",
+            product_plan_identifier: "<product plan identifier>",
+            device_identifier: "<device identifier>",
+            device_name: "<device name>",
         })
         .send()
         .await?;
@@ -574,6 +716,10 @@ struct SubscriptionCheckRequest: Encodable {
     let tntSubdomain: String
     let customerAccountSecretKey: String
     let subscriptionSecretKey: String
+    let productIdentifier: String
+    let productPlanIdentifier: String
+    let deviceIdentifier: String
+    let deviceName: String
 }
 
 struct SubscriptionCheckResult: Decodable {
@@ -596,7 +742,11 @@ func checkSubscription() async throws -> Bool {
         SubscriptionCheckRequest(
             tntSubdomain: "yourcompany",
             customerAccountSecretKey: "<customer account secret key>",
-            subscriptionSecretKey: "<subscription secret key>"
+            subscriptionSecretKey: "<subscription secret key>",
+            productIdentifier: "<product identifier>",
+            productPlanIdentifier: "<product plan identifier>",
+            deviceIdentifier: "<device identifier>",
+            deviceName: Host.current().localizedName ?? "<device name>"
         )
     )
 
@@ -626,7 +776,11 @@ request.timeoutInterval = 30;
 NSDictionary *body = @{
   @"TntSubdomain": @"yourcompany",
   @"CustomerAccountSecretKey": @"<customer account secret key>",
-  @"SubscriptionSecretKey": @"<subscription secret key>"
+  @"SubscriptionSecretKey": @"<subscription secret key>",
+  @"ProductIdentifier": @"<product identifier>",
+  @"ProductPlanIdentifier": @"<product plan identifier>",
+  @"DeviceIdentifier": @"<device identifier>",
+  @"DeviceName": @"<device name>"
 };
 request.HTTPBody = [NSJSONSerialization dataWithJSONObject:body options:0 error:nil];
 
@@ -687,6 +841,10 @@ int main(void) {
   cJSON_AddStringToObject(request, "TntSubdomain", "yourcompany");
   cJSON_AddStringToObject(request, "CustomerAccountSecretKey", "<customer account secret key>");
   cJSON_AddStringToObject(request, "SubscriptionSecretKey", "<subscription secret key>");
+  cJSON_AddStringToObject(request, "ProductIdentifier", "<product identifier>");
+  cJSON_AddStringToObject(request, "ProductPlanIdentifier", "<product plan identifier>");
+  cJSON_AddStringToObject(request, "DeviceIdentifier", "<device identifier>");
+  cJSON_AddStringToObject(request, "DeviceName", "<device name>");
   char *body = cJSON_PrintUnformatted(request);
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -752,6 +910,10 @@ int main() {
     {"TntSubdomain", "yourcompany"},
     {"CustomerAccountSecretKey", "<customer account secret key>"},
     {"SubscriptionSecretKey", "<subscription secret key>"},
+    {"ProductIdentifier", "<product identifier>"},
+    {"ProductPlanIdentifier", "<product plan identifier>"},
+    {"DeviceIdentifier", "<device identifier>"},
+    {"DeviceName", "<device name>"},
   }.dump();
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -802,8 +964,10 @@ The check is a plain JSON `POST`, so any tool that can make an HTTP request can 
 1. Add a **Webhooks by Zapier** action and choose **POST**.
 2. **URL:** `https://live.us.api.archwayportal.com/Sdk/CheckSubscriptionAsync`
 3. **Payload Type:** `json`
-4. **Data:** three rows - `TntSubdomain`, `CustomerAccountSecretKey` and `SubscriptionSecretKey` - mapped from
-   earlier steps or typed in.
+4. **Data:** one row per field - `TntSubdomain`, `CustomerAccountSecretKey`, `SubscriptionSecretKey`,
+   `ProductIdentifier`, `ProductPlanIdentifier`, and for a plan sold per device `DeviceIdentifier` and
+   `DeviceName` - mapped from earlier steps or typed in. A Zap is usually one "device": give it a fixed
+   `DeviceIdentifier` such as `zapier`.
 5. Add a **Filter** or **Paths** step on `Is Subscription Active` to continue only when it is `true`.
 
 A `200` with `IsSubscriptionActive` `false` is a **successful** step - the subscription is simply not active - so
@@ -818,14 +982,15 @@ on. Add a filter on `IsSubscriptionActive`.
 
 ### n8n
 
-Use the **HTTP Request** node: method `POST`, the URL above, **Send Body** on with **JSON**, the three fields as
-body parameters. Follow it with an **IF** node on `IsSubscriptionActive`.
+Use the **HTTP Request** node: method `POST`, the URL above, **Send Body** on with **JSON**, the fields from
+[The request](#the-request) as body parameters. Follow it with an **IF** node on `IsSubscriptionActive`.
 
 ---
 
 ## Keeping the keys safe
 
-The two keys are **secrets** - together they prove a subscription. Treat them like a password.
+The two keys are **secrets** - together they prove a subscription. Treat them like a password. The product and
+plan identifiers and the device identifier are not secrets.
 
 - **Make the call from a server or a trusted backend**, not from a web page or a browser-based tool, where
   anyone can read the keys from the page.
@@ -839,12 +1004,13 @@ The two keys are **secrets** - together they prove a subscription. Treat them li
 ## Good to know
 
 - **Regenerating a key breaks existing integrations immediately.** Anything still using the old key gets `401`
-  until it is updated.
+  until it is updated. Devices already registered on the subscription stay registered.
 - **How fresh the answer is.** A subscription that is not active is re-checked with the payment provider every
   time. An active one is re-checked at least every 12 hours, so a change made outside Archway - for example
   directly in Stripe - can take up to 12 hours to show here.
 - **How often to call.** There is no need to check on every request your application handles. Checking when a
-  customer signs in, when your application starts, or a few times a day is plenty.
+  customer signs in, when your application starts, or a few times a day is plenty. Every check also confirms
+  the device, so a device your customer deactivates is refused on its next check.
 - **Rate limiting.** Many requests from one address in a short time are temporarily blocked with `403` - see
   [Status codes](#status-codes). Normal use will never come close.
 - **Timeouts.** Answers normally arrive within a second or two. Allow up to 30 seconds before treating a call as
