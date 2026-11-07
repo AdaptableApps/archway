@@ -1,8 +1,8 @@
-![Archway](https://adaptableapps.net/images/Archway_Logo_v2_Banner_White_On_Black.svg)
+![Archway](https://archwayportal.com/images/Archway_Logo_v3_Banner_White_On_Black.svg)
 
 ## Introduction
 
-Archway is a portal for SaaS companies that lets your customers sign up for subscriptions and manage them
+Archway is a portal for companies that lets your customers sign up for subscriptions and manage them
 themselves. Integrated payment through your own Stripe account makes the experience seamless for everyone -
 your customers subscribe, upgrade and cancel without talking to you, and the money arrives in your account.
 
